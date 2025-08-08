@@ -2,134 +2,183 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom Timer with Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Mobile Timer</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            background-size: cover;
-            background-position: center;
             background-attachment: fixed;
             overflow: hidden;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
             position: relative;
+            padding: 10px;
         }
 
-        /* Settings Icon */
+        /* Mobile-first Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 5px;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
         .settings-icon {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
-        .settings-icon:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(90deg);
+        .settings-icon:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.25);
         }
 
         .settings-icon svg {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             fill: white;
         }
 
-        /* Settings Panel */
+        /* Mobile Settings Panel */
         .settings-panel {
             position: fixed;
-            top: 80px;
-            right: 20px;
-            width: 320px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 25px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-20px) scale(0.9);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 999;
+            transition: all 0.3s ease;
+            z-index: 1001;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .settings-panel.active {
             opacity: 1;
             visibility: visible;
-            transform: translateY(0) scale(1);
         }
 
-        .settings-panel h3 {
+        .settings-content {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 25px 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .close-settings {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
             color: white;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            text-align: center;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Timer Container - Enhanced Frosted Glass */
+        /* Main Timer Container */
         .timer-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 10px;
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(25px);
             border-radius: 25px;
-            padding: 40px;
-            text-align: center;
+            margin: 10px 0;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            min-width: 400px;
-            position: relative;
-        }
-
-        .timer-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            z-index: -1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .timer-display {
-            font-size: 4rem;
+            font-size: 3.5rem;
             color: #ffffff;
-            font-weight: bold;
+            font-weight: 700;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            font-family: 'SF Mono', Consolas, monospace;
+            letter-spacing: 2px;
         }
 
+        /* Mobile-Optimized Controls */
         .controls {
+            width: 100%;
             display: flex;
             flex-direction: column;
             gap: 20px;
             align-items: center;
+        }
+
+        .quick-timers {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 20px;
+        }
+
+        .quick-timer-btn {
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
+        }
+
+        .quick-timer-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.25);
         }
 
         .time-inputs {
@@ -138,20 +187,38 @@
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
+            width: 100%;
+            max-width: 280px;
+        }
+
+        .time-input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
         }
 
         .time-input {
-            width: 60px;
-            padding: 10px;
+            width: 100%;
+            max-width: 70px;
+            padding: 15px 10px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             color: white;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             font-weight: bold;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+
+        .time-input::-webkit-outer-spin-button,
+        .time-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .time-input::placeholder {
@@ -159,168 +226,138 @@
         }
 
         .time-label {
-            color: white;
-            font-size: 0.9rem;
-            margin-top: 5px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.75rem;
+            margin-top: 8px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
+        /* Mobile Button Grid */
         .buttons {
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
+            width: 100%;
+            max-width: 280px;
         }
 
-        /* Enhanced Frosted Glass Buttons */
         button {
-            padding: 12px 24px;
+            padding: 16px 20px;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             font-size: 1rem;
-            font-weight: bold;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-transform: uppercase;
             letter-spacing: 1px;
             backdrop-filter: blur(15px);
-            box-shadow: 
-                0 4px 16px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
+            touch-action: manipulation;
+            min-height: 56px;
         }
 
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            backdrop-filter: blur(5px);
-            z-index: -1;
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .btn-primary {
-            background: rgba(255, 107, 107, 0.3);
-            border: 2px solid rgba(255, 107, 107, 0.7);
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
             color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .btn-primary:hover {
-            background: rgba(255, 107, 107, 0.45);
-            border-color: rgba(255, 107, 107, 0.9);
-            transform: translateY(-3px);
-            box-shadow: 
-                0 8px 25px rgba(255, 107, 107, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .btn-secondary {
-            background: rgba(72, 52, 212, 0.3);
-            border: 2px solid rgba(72, 52, 212, 0.7);
+            background: linear-gradient(135deg, #4834d4, #3742fa);
             color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(72, 52, 212, 0.45);
-            border-color: rgba(72, 52, 212, 0.9);
-            transform: translateY(-3px);
-            box-shadow: 
-                0 8px 25px rgba(72, 52, 212, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .btn-success {
-            background: rgba(0, 210, 211, 0.3);
-            border: 2px solid rgba(0, 210, 211, 0.7);
+            background: linear-gradient(135deg, #00d2d3, #01a3a4);
             color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .btn-success:hover {
-            background: rgba(0, 210, 211, 0.45);
-            border-color: rgba(0, 210, 211, 0.9);
-            transform: translateY(-3px);
-            box-shadow: 
-                0 8px 25px rgba(0, 210, 211, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .btn-warning {
-            background: rgba(255, 167, 38, 0.3);
-            border: 2px solid rgba(255, 167, 38, 0.7);
+            background: linear-gradient(135deg, #ffa726, #ff9800);
             color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        .btn-warning:hover {
-            background: rgba(255, 167, 38, 0.45);
-            border-color: rgba(255, 167, 38, 0.9);
-            transform: translateY(-3px);
-            box-shadow: 
-                0 8px 25px rgba(255, 167, 38, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .status {
-            color: #ffffff;
-            margin-top: 15px;
-            font-size: 1.1rem;
-            font-weight: bold;
+            color: rgba(255, 255, 255, 0.9);
+            margin: 20px 0 10px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         }
 
         .progress-bar {
             width: 100%;
-            height: 6px;
+            height: 8px;
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-            margin-top: 20px;
+            border-radius: 4px;
+            margin-top: 15px;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+            background: linear-gradient(90deg, #ff6b6b, #ffa726);
             width: 0%;
-            transition: width 0.1s ease;
-            border-radius: 3px;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
         }
 
-        .quick-timers {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+        /* Settings Panel Content */
+        .settings-panel h3 {
+            color: white;
+            margin-bottom: 25px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            text-align: center;
         }
 
-        .quick-timer-btn {
-            padding: 8px 12px;
+        .preset-wallpapers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .preset-btn {
+            padding: 14px 12px;
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(10px);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
             cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            touch-action: manipulation;
         }
 
-        .quick-timer-btn:hover {
+        .preset-btn:active {
+            transform: scale(0.95);
             background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-1px);
         }
 
-        /* Settings Panel Controls */
         .file-input-wrapper {
-            position: relative;
-            display: block;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
         .file-input {
@@ -328,45 +365,21 @@
         }
 
         .file-input-label {
-            padding: 12px 20px;
-            background: rgba(95, 39, 205, 0.6);
-            backdrop-filter: blur(10px);
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #5f27cd, #341f97);
             color: white;
             border-radius: 15px;
             cursor: pointer;
-            transition: all 0.3s ease;
             display: block;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+            touch-action: manipulation;
+            transition: all 0.2s ease;
         }
 
-        .file-input-label:hover {
-            background: rgba(95, 39, 205, 0.8);
-            transform: translateY(-2px);
-        }
-
-        .preset-wallpapers {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .preset-btn {
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .preset-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-1px);
+        .file-input-label:active {
+            transform: scale(0.98);
         }
 
         .theme-section {
@@ -379,49 +392,93 @@
             color: white;
             margin-bottom: 15px;
             font-size: 1rem;
+            font-weight: 600;
         }
 
-        @keyframes flash {
-            0%, 100% { background-color: rgba(255, 255, 255, 0); }
-            50% { background-color: rgba(255, 255, 255, 0.3); }
-        }
-
-        @media (max-width: 480px) {
-            .timer-container {
-                padding: 20px;
-                min-width: 300px;
+        /* Pulse animation for timer completion */
+        @keyframes pulseGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+                transform: scale(1);
             }
-            
+            50% { 
+                box-shadow: 0 0 40px rgba(255, 107, 107, 0.8);
+                transform: scale(1.02);
+            }
+        }
+
+        .timer-complete {
+            animation: pulseGlow 1s ease-in-out infinite;
+        }
+
+        /* Landscape orientation adjustments */
+        @media screen and (orientation: landscape) and (max-height: 500px) {
             .timer-display {
                 font-size: 2.5rem;
+                margin-bottom: 20px;
+            }
+            
+            .header {
+                padding: 10px 5px;
+            }
+            
+            .timer-container {
+                margin: 5px 0;
+                padding: 15px 10px;
+            }
+            
+            .buttons {
+                grid-template-columns: repeat(4, 1fr);
             }
             
             .time-inputs {
-                flex-direction: column;
-                gap: 10px;
+                margin-bottom: 15px;
             }
+        }
 
-            .settings-panel {
-                width: calc(100vw - 40px);
-                right: 20px;
+        /* Very small screens */
+        @media (max-width: 320px) {
+            .timer-display {
+                font-size: 2.8rem;
+            }
+            
+            .time-input {
+                font-size: 1.1rem;
+                padding: 12px 8px;
+            }
+            
+            button {
+                padding: 14px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Android-specific optimizations */
+        @supports (-webkit-touch-callout: none) {
+            input[type="number"] {
+                -webkit-appearance: none;
+                -moz-appearance: textfield;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Settings Icon -->
-    <div class="settings-icon" onclick="toggleSettings()">
-        <svg viewBox="0 0 24 24">
-            <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
-        </svg>
+    <!-- Mobile Header -->
+    <div class="header">
+        <h1>⏱️ Timer</h1>
+        <div class="settings-icon" onclick="toggleSettings()">
+            <svg viewBox="0 0 24 24">
+                <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+            </svg>
+        </div>
     </div>
 
-    <!-- Settings Panel -->
+    <!-- Full-Screen Settings Panel -->
     <div class="settings-panel" id="settingsPanel">
-        <h3>⚙️ Settings</h3>
-        
-        <!-- Wallpaper Controls -->
-        <div>
+        <button class="close-settings" onclick="toggleSettings()">×</button>
+        <div class="settings-content">
+            <h3>⚙️ Settings</h3>
+            
             <div class="file-input-wrapper">
                 <input type="file" class="file-input" id="wallpaperInput" accept="image/*" onchange="changeWallpaper(event)">
                 <label for="wallpaperInput" class="file-input-label">📁 Upload Wallpaper</label>
@@ -435,21 +492,20 @@
                 <button class="preset-btn" onclick="setPresetWallpaper('space')">Space</button>
                 <button class="preset-btn" onclick="setPresetWallpaper('default')">Default</button>
             </div>
-        </div>
 
-        <!-- Theme Section -->
-        <div class="theme-section">
-            <h4>🎨 Glass Intensity</h4>
-            <div class="preset-wallpapers">
-                <button class="preset-btn" onclick="setGlassTheme('light')">Light</button>
-                <button class="preset-btn" onclick="setGlassTheme('medium')">Medium</button>
-                <button class="preset-btn" onclick="setGlassTheme('heavy')">Heavy</button>
-                <button class="preset-btn" onclick="setGlassTheme('ultra')">Ultra</button>
+            <div class="theme-section">
+                <h4>🎨 Glass Intensity</h4>
+                <div class="preset-wallpapers">
+                    <button class="preset-btn" onclick="setGlassTheme('light')">Light</button>
+                    <button class="preset-btn" onclick="setGlassTheme('medium')">Medium</button>
+                    <button class="preset-btn" onclick="setGlassTheme('heavy')">Heavy</button>
+                    <button class="preset-btn" onclick="setGlassTheme('ultra')">Ultra</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Timer Container -->
+    <!-- Main Timer Container -->
     <div class="timer-container">
         <div class="timer-display" id="timerDisplay">00:00:00</div>
         
@@ -460,20 +516,21 @@
                 <button class="quick-timer-btn" onclick="setQuickTimer(10, 0, 0)">10 Min</button>
                 <button class="quick-timer-btn" onclick="setQuickTimer(15, 0, 0)">15 Min</button>
                 <button class="quick-timer-btn" onclick="setQuickTimer(25, 0, 0)">Pomodoro</button>
+                <button class="quick-timer-btn" onclick="setQuickTimer(30, 0, 0)">30 Min</button>
                 <button class="quick-timer-btn" onclick="setQuickTimer(0, 1, 0)">1 Hour</button>
             </div>
 
             <!-- Time Input -->
             <div class="time-inputs">
-                <div>
+                <div class="time-input-group">
                     <input type="number" class="time-input" id="hours" placeholder="00" min="0" max="23">
                     <div class="time-label">Hours</div>
                 </div>
-                <div>
+                <div class="time-input-group">
                     <input type="number" class="time-input" id="minutes" placeholder="00" min="0" max="59">
                     <div class="time-label">Minutes</div>
                 </div>
-                <div>
+                <div class="time-input-group">
                     <input type="number" class="time-input" id="seconds" placeholder="00" min="0" max="59">
                     <div class="time-label">Seconds</div>
                 </div>
@@ -481,10 +538,10 @@
 
             <!-- Control Buttons -->
             <div class="buttons">
-                <button class="btn-success" onclick="startTimer()">Start</button>
-                <button class="btn-warning" onclick="pauseTimer()">Pause</button>
-                <button class="btn-secondary" onclick="stopTimer()">Stop</button>
-                <button class="btn-primary" onclick="resetTimer()">Reset</button>
+                <button class="btn-success" onclick="startTimer()">▶ Start</button>
+                <button class="btn-warning" onclick="pauseTimer()">⏸ Pause</button>
+                <button class="btn-secondary" onclick="stopTimer()">⏹ Stop</button>
+                <button class="btn-primary" onclick="resetTimer()">🔄 Reset</button>
             </div>
 
             <!-- Status -->
@@ -509,20 +566,12 @@
         const progressFill = document.getElementById('progressFill');
         const settingsPanel = document.getElementById('settingsPanel');
 
-        // Audio notification
-        const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEa');
+        // Enhanced notification sound for mobile
+        const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEa');
 
         function toggleSettings() {
             settingsPanel.classList.toggle('active');
         }
-
-        // Close settings when clicking outside
-        document.addEventListener('click', function(event) {
-            const settingsIcon = document.querySelector('.settings-icon');
-            if (!settingsPanel.contains(event.target) && !settingsIcon.contains(event.target)) {
-                settingsPanel.classList.remove('active');
-            }
-        });
 
         function formatTime(seconds) {
             const hours = Math.floor(seconds / 3600);
@@ -548,6 +597,10 @@
             document.getElementById('minutes').value = minutes;
             document.getElementById('seconds').value = seconds;
             resetTimer();
+            // Add haptic feedback if available
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         }
 
         function startTimer() {
@@ -572,7 +625,12 @@
 
             isRunning = true;
             isPaused = false;
-            status.textContent = 'Timer running...';
+            status.textContent = '⏱️ Timer running...';
+            
+            // Haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate(100);
+            }
             
             timer = setInterval(() => {
                 timeLeft--;
@@ -580,13 +638,21 @@
                 
                 if (timeLeft <= 0) {
                     stopTimer();
-                    status.textContent = '⏰ Time\'s up!';
+                    status.textContent = '🎉 Time\'s up!';
+                    
+                    // Enhanced mobile notifications
                     notificationSound.play().catch(e => console.log('Audio play failed'));
                     
-                    document.body.style.animation = 'flash 0.5s ease-in-out 3';
+                    // Vibration pattern for completion
+                    if (navigator.vibrate) {
+                        navigator.vibrate([300, 100, 300, 100, 300]);
+                    }
+                    
+                    // Visual feedback
+                    document.querySelector('.timer-container').classList.add('timer-complete');
                     setTimeout(() => {
-                        document.body.style.animation = '';
-                    }, 1500);
+                        document.querySelector('.timer-container').classList.remove('timer-complete');
+                    }, 3000);
                 }
             }, 1000);
         }
@@ -596,7 +662,10 @@
                 clearInterval(timer);
                 isRunning = false;
                 isPaused = true;
-                status.textContent = 'Timer paused';
+                status.textContent = '⏸️ Timer paused';
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
             }
         }
 
@@ -604,7 +673,10 @@
             clearInterval(timer);
             isRunning = false;
             isPaused = false;
-            status.textContent = 'Timer stopped';
+            status.textContent = '⏹️ Timer stopped';
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         }
 
         function resetTimer() {
@@ -616,8 +688,11 @@
             timeLeft = hours * 3600 + minutes * 60 + seconds;
             totalTime = timeLeft;
             updateDisplay();
-            status.textContent = 'Ready to start';
+            status.textContent = '✅ Ready to start';
             progressFill.style.width = '0%';
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
         }
 
         function changeWallpaper(event) {
@@ -647,11 +722,14 @@
             document.body.style.backgroundImage = presets[preset];
             document.body.style.backgroundSize = 'cover';
             document.body.style.backgroundPosition = 'center';
+            
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
         }
 
         function setGlassTheme(intensity) {
             const timerContainer = document.querySelector('.timer-container');
-            const settingsPanel = document.querySelector('.settings-panel');
             
             const themes = {
                 'light': {
@@ -682,25 +760,77 @@
             timerContainer.style.backdropFilter = `blur(${theme.blur})`;
             timerContainer.style.borderColor = theme.border;
             
-            settingsPanel.style.backdropFilter = `blur(${theme.blur})`;
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
         }
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space' && !event.target.matches('input')) {
-                event.preventDefault();
-                if (isRunning) {
-                    pauseTimer();
-                } else {
-                    startTimer();
+        // Mobile-specific touch handling
+        document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // Prevent accidental zoom on inputs
+        document.addEventListener('touchend', function (event) {
+            const noScaleInputs = document.querySelectorAll('input[type="number"]');
+            let inNoScaleInputs = false;
+            for (let i = 0; i < noScaleInputs.length; i++) {
+                if (noScaleInputs[i] === event.target) {
+                    inNoScaleInputs = true;
+                    break;
                 }
-            } else if (event.code === 'Escape') {
-                stopTimer();
-                settingsPanel.classList.remove('active');
-            } else if (event.code === 'KeyR' && !event.target.matches('input')) {
-                resetTimer();
+            }
+            if (!inNoScaleInputs) {
+                event.target.blur();
             }
         });
+
+        // Keyboard shortcuts (disabled for mobile focus)
+        if (!(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
+            document.addEventListener('keydown', function(event) {
+                if (event.code === 'Space' && !event.target.matches('input')) {
+                    event.preventDefault();
+                    if (isRunning) {
+                        pauseTimer();
+                    } else {
+                        startTimer();
+                    }
+                } else if (event.code === 'Escape') {
+                    stopTimer();
+                    settingsPanel.classList.remove('active');
+                } else if (event.code === 'KeyR' && !event.target.matches('input')) {
+                    resetTimer();
+                }
+            });
+        }
+
+        // Wake lock to prevent screen from sleeping during timer
+        let wakeLock = null;
+        
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('Wake lock failed:', err);
+            }
+        }
+
+        // Request wake lock when timer starts
+        const originalStartTimer = startTimer;
+        startTimer = function() {
+            originalStartTimer();
+            requestWakeLock();
+        };
+
+        // Release wake lock when timer stops
+        const originalStopTimer = stopTimer;
+        stopTimer = function() {
+            originalStopTimer();
+            if (wakeLock) {
+                wakeLock.release();
+                wakeLock = null;
+            }
+        };
 
         // Initialize display
         updateDisplay();
