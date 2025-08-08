@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Timer with Settings</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Settings Icon */
+        .settings-icon {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .settings-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .settings-icon svg {
+            width: 24px;
+            height: 24px;
+            fill: white;
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 320px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-20px) scale(0.9);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 999;
+        }
+
+        .settings-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .settings-panel h3 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Timer Container - Enhanced Frosted Glass */
+        .timer-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            min-width: 400px;
+            position: relative;
+        }
+
+        .timer-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            z-index: -1;
+        }
+
+        .timer-display {
+            font-size: 4rem;
+            color: #ffffff;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .time-inputs {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .time-input {
+            width: 60px;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .time-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .time-label {
+            color: white;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Enhanced Frosted Glass Buttons */
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 25px;
+            backdrop-filter: blur(5px);
+            z-index: -1;
+        }
+
+        .btn-primary {
+            background: rgba(255, 107, 107, 0.3);
+            border: 2px solid rgba(255, 107, 107, 0.7);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 107, 107, 0.45);
+            border-color: rgba(255, 107, 107, 0.9);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(255, 107, 107, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(72, 52, 212, 0.3);
+            border: 2px solid rgba(72, 52, 212, 0.7);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(72, 52, 212, 0.45);
+            border-color: rgba(72, 52, 212, 0.9);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(72, 52, 212, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-success {
+            background: rgba(0, 210, 211, 0.3);
+            border: 2px solid rgba(0, 210, 211, 0.7);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-success:hover {
+            background: rgba(0, 210, 211, 0.45);
+            border-color: rgba(0, 210, 211, 0.9);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(0, 210, 211, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-warning {
+            background: rgba(255, 167, 38, 0.3);
+            border: 2px solid rgba(255, 167, 38, 0.7);
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-warning:hover {
+            background: rgba(255, 167, 38, 0.45);
+            border-color: rgba(255, 167, 38, 0.9);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(255, 167, 38, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+
+        .status {
+            color: #ffffff;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b6b, #ee5a24);
+            width: 0%;
+            transition: width 0.1s ease;
+            border-radius: 3px;
+        }
+
+        .quick-timers {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .quick-timer-btn {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .quick-timer-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Settings Panel Controls */
+        .file-input-wrapper {
+            position: relative;
+            display: block;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-input-label {
+            padding: 12px 20px;
+            background: rgba(95, 39, 205, 0.6);
+            backdrop-filter: blur(10px);
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: block;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .file-input-label:hover {
+            background: rgba(95, 39, 205, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .preset-wallpapers {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .preset-btn {
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .theme-section {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 20px;
+            margin-top: 20px;
+        }
+
+        .theme-section h4 {
+            color: white;
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        @keyframes flash {
+            0%, 100% { background-color: rgba(255, 255, 255, 0); }
+            50% { background-color: rgba(255, 255, 255, 0.3); }
+        }
+
+        @media (max-width: 480px) {
+            .timer-container {
+                padding: 20px;
+                min-width: 300px;
+            }
+            
+            .timer-display {
+                font-size: 2.5rem;
+            }
+            
+            .time-inputs {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .settings-panel {
+                width: calc(100vw - 40px);
+                right: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Settings Icon -->
+    <div class="settings-icon" onclick="toggleSettings()">
+        <svg viewBox="0 0 24 24">
+            <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+        </svg>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settingsPanel">
+        <h3>⚙️ Settings</h3>
+        
+        <!-- Wallpaper Controls -->
+        <div>
+            <div class="file-input-wrapper">
+                <input type="file" class="file-input" id="wallpaperInput" accept="image/*" onchange="changeWallpaper(event)">
+                <label for="wallpaperInput" class="file-input-label">📁 Upload Wallpaper</label>
+            </div>
+            
+            <div class="preset-wallpapers">
+                <button class="preset-btn" onclick="setPresetWallpaper('gradient1')">Ocean</button>
+                <button class="preset-btn" onclick="setPresetWallpaper('gradient2')">Sunset</button>
+                <button class="preset-btn" onclick="setPresetWallpaper('gradient3')">Forest</button>
+                <button class="preset-btn" onclick="setPresetWallpaper('gradient4')">Purple</button>
+                <button class="preset-btn" onclick="setPresetWallpaper('space')">Space</button>
+                <button class="preset-btn" onclick="setPresetWallpaper('default')">Default</button>
+            </div>
+        </div>
+
+        <!-- Theme Section -->
+        <div class="theme-section">
+            <h4>🎨 Glass Intensity</h4>
+            <div class="preset-wallpapers">
+                <button class="preset-btn" onclick="setGlassTheme('light')">Light</button>
+                <button class="preset-btn" onclick="setGlassTheme('medium')">Medium</button>
+                <button class="preset-btn" onclick="setGlassTheme('heavy')">Heavy</button>
+                <button class="preset-btn" onclick="setGlassTheme('ultra')">Ultra</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Container -->
+    <div class="timer-container">
+        <div class="timer-display" id="timerDisplay">00:00:00</div>
+        
+        <div class="controls">
+            <!-- Quick Timer Buttons -->
+            <div class="quick-timers">
+                <button class="quick-timer-btn" onclick="setQuickTimer(5, 0, 0)">5 Min</button>
+                <button class="quick-timer-btn" onclick="setQuickTimer(10, 0, 0)">10 Min</button>
+                <button class="quick-timer-btn" onclick="setQuickTimer(15, 0, 0)">15 Min</button>
+                <button class="quick-timer-btn" onclick="setQuickTimer(25, 0, 0)">Pomodoro</button>
+                <button class="quick-timer-btn" onclick="setQuickTimer(0, 1, 0)">1 Hour</button>
+            </div>
+
+            <!-- Time Input -->
+            <div class="time-inputs">
+                <div>
+                    <input type="number" class="time-input" id="hours" placeholder="00" min="0" max="23">
+                    <div class="time-label">Hours</div>
+                </div>
+                <div>
+                    <input type="number" class="time-input" id="minutes" placeholder="00" min="0" max="59">
+                    <div class="time-label">Minutes</div>
+                </div>
+                <div>
+                    <input type="number" class="time-input" id="seconds" placeholder="00" min="0" max="59">
+                    <div class="time-label">Seconds</div>
+                </div>
+            </div>
+
+            <!-- Control Buttons -->
+            <div class="buttons">
+                <button class="btn-success" onclick="startTimer()">Start</button>
+                <button class="btn-warning" onclick="pauseTimer()">Pause</button>
+                <button class="btn-secondary" onclick="stopTimer()">Stop</button>
+                <button class="btn-primary" onclick="resetTimer()">Reset</button>
+            </div>
+
+            <!-- Status -->
+            <div class="status" id="status">Ready to start</div>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let timer = null;
+        let timeLeft = 0;
+        let totalTime = 0;
+        let isRunning = false;
+        let isPaused = false;
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        const status = document.getElementById('status');
+        const progressFill = document.getElementById('progressFill');
+        const settingsPanel = document.getElementById('settingsPanel');
+
+        // Audio notification
+        const notificationSound = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEaATiN1fPQfS4HJXnK8N2QQAoUXrPp66hVFApGn+DyvmEa');
+
+        function toggleSettings() {
+            settingsPanel.classList.toggle('active');
+        }
+
+        // Close settings when clicking outside
+        document.addEventListener('click', function(event) {
+            const settingsIcon = document.querySelector('.settings-icon');
+            if (!settingsPanel.contains(event.target) && !settingsIcon.contains(event.target)) {
+                settingsPanel.classList.remove('active');
+            }
+        });
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(timeLeft);
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            if (totalTime > 0) {
+                const progress = ((totalTime - timeLeft) / totalTime) * 100;
+                progressFill.style.width = `${progress}%`;
+            }
+        }
+
+        function setQuickTimer(minutes, hours = 0, seconds = 0) {
+            document.getElementById('hours').value = hours;
+            document.getElementById('minutes').value = minutes;
+            document.getElementById('seconds').value = seconds;
+            resetTimer();
+        }
+
+        function startTimer() {
+            if (!isRunning && !isPaused) {
+                const hours = parseInt(document.getElementById('hours').value) || 0;
+                const minutes = parseInt(document.getElementById('minutes').value) || 0;
+                const seconds = parseInt(document.getElementById('seconds').value) || 0;
+                
+                timeLeft = hours * 3600 + minutes * 60 + seconds;
+                totalTime = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    alert('Please set a valid time!');
+                    return;
+                }
+            }
+            
+            if (timeLeft <= 0) {
+                alert('Timer has finished! Please reset to start again.');
+                return;
+            }
+
+            isRunning = true;
+            isPaused = false;
+            status.textContent = 'Timer running...';
+            
+            timer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                
+                if (timeLeft <= 0) {
+                    stopTimer();
+                    status.textContent = '⏰ Time\'s up!';
+                    notificationSound.play().catch(e => console.log('Audio play failed'));
+                    
+                    document.body.style.animation = 'flash 0.5s ease-in-out 3';
+                    setTimeout(() => {
+                        document.body.style.animation = '';
+                    }, 1500);
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (isRunning) {
+                clearInterval(timer);
+                isRunning = false;
+                isPaused = true;
+                status.textContent = 'Timer paused';
+            }
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+            isRunning = false;
+            isPaused = false;
+            status.textContent = 'Timer stopped';
+        }
+
+        function resetTimer() {
+            stopTimer();
+            const hours = parseInt(document.getElementById('hours').value) || 0;
+            const minutes = parseInt(document.getElementById('minutes').value) || 0;
+            const seconds = parseInt(document.getElementById('seconds').value) || 0;
+            
+            timeLeft = hours * 3600 + minutes * 60 + seconds;
+            totalTime = timeLeft;
+            updateDisplay();
+            status.textContent = 'Ready to start';
+            progressFill.style.width = '0%';
+        }
+
+        function changeWallpaper(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.body.style.backgroundImage = `url('${e.target.result}')`;
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center';
+                    document.body.style.backgroundAttachment = 'fixed';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function setPresetWallpaper(preset) {
+            const presets = {
+                'gradient1': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'gradient2': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'gradient3': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                'gradient4': 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                'space': 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)',
+                'default': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            };
+            
+            document.body.style.backgroundImage = presets[preset];
+            document.body.style.backgroundSize = 'cover';
+            document.body.style.backgroundPosition = 'center';
+        }
+
+        function setGlassTheme(intensity) {
+            const timerContainer = document.querySelector('.timer-container');
+            const settingsPanel = document.querySelector('.settings-panel');
+            
+            const themes = {
+                'light': {
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    blur: '15px',
+                    border: 'rgba(255, 255, 255, 0.15)'
+                },
+                'medium': {
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    blur: '25px',
+                    border: 'rgba(255, 255, 255, 0.2)'
+                },
+                'heavy': {
+                    background: 'rgba(255, 255, 255, 0.12)',
+                    blur: '35px',
+                    border: 'rgba(255, 255, 255, 0.25)'
+                },
+                'ultra': {
+                    background: 'rgba(255, 255, 255, 0.15)',
+                    blur: '45px',
+                    border: 'rgba(255, 255, 255, 0.3)'
+                }
+            };
+            
+            const theme = themes[intensity];
+            
+            timerContainer.style.background = theme.background;
+            timerContainer.style.backdropFilter = `blur(${theme.blur})`;
+            timerContainer.style.borderColor = theme.border;
+            
+            settingsPanel.style.backdropFilter = `blur(${theme.blur})`;
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' && !event.target.matches('input')) {
+                event.preventDefault();
+                if (isRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            } else if (event.code === 'Escape') {
+                stopTimer();
+                settingsPanel.classList.remove('active');
+            } else if (event.code === 'KeyR' && !event.target.matches('input')) {
+                resetTimer();
+            }
+        });
+
+        // Initialize display
+        updateDisplay();
+
+        // Auto-save preferences
+        window.addEventListener('beforeunload', function() {
+            localStorage.setItem('timerWallpaper', document.body.style.backgroundImage);
+        });
+
+        // Load saved wallpaper
+        window.addEventListener('load', function() {
+            const savedWallpaper = localStorage.getItem('timerWallpaper');
+            if (savedWallpaper && savedWallpaper !== 'none') {
+                document.body.style.backgroundImage = savedWallpaper;
+            }
+        });
+    </script>
+</body>
+</html>
